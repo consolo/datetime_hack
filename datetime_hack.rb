@@ -10,61 +10,22 @@ module CoHack
       def datetime_hack(*attributes)
         
         send :define_method, "combine_to_datetime".to_sym do |date_string, time_string|
-          return nil if date_string.to_s.empty? or time_string.to_s.empty?  
-          
+          date_string ||= ''
+          time_string ||= ''
           time_string = "00:00" if time_string == "0"
           
           time_string.insert(-3, ":") if time_string.length < 5 and time_string.length > 2
           time_string.squeeze!(":")
           
           if time_match = time_string.match(/^([0-9][0-9](\:)*[0-9][0-9])$/)
-            hour, minutes  = time_match[0].split(":")
-            
-            return nil unless (hour.to_i >= 0 and hour.to_i < 24)
-            return nil unless (minutes.to_i >= 0 and minutes.to_i <= 60)
-          else
-            return nil
+            hour, minutes = time_match[0].split(":")
           end
           
-          ds = date_string.to_date
-          # default to EST
-          Time.zone ||= 'Eastern Time (US & Canada)'
-          Time.local ds.year, ds.month, ds.day, hour.to_i, minutes.to_i, 0, 0, (Time.zone.utc_offset / 3600)
-        end
-        
-        send :define_method, "is_valid_date?".to_sym do |field|
-          date_string = send(field) #instance_variable_get("@#{field}")
+          month, day, year = date_string.split('/')
           
-          if date_string.to_s.empty?
-            #do nothing, we're cool
-          else
-            date = date_string.to_date rescue nil
-
-            if date.nil?
-              errors.add(field, 'has an invalid date format, It must be in MM/DD/YYYY')
-            end
-          end
-        end
-        
-        send :define_method, "is_valid_time?".to_sym do |field|
-          time = send(field) #instance_variable_get("@#{field}")
-          
-          time = "00:00" if time == "0"
-          
-          time.insert(-3, ":") if time and time.length < 5 and time.length > 2
-          time.squeeze!(":") if time
-          
-          if time.to_s.empty?
-            # do nothing! it's cool!
-          elsif time.match(/^([0-9][0-9](\:)*[0-9][0-9])$/)
-            hour, minutes = time.split(":")
-            
-            errors.add(field, 'must be in valid 24 hour time, between 0000 and 2359') unless (hour.to_i >= 0 and hour.to_i < 24)
-            
-            errors.add(field, 'has an invalid number of minutes') unless (minutes.to_i >= 0 and minutes.to_i < 60)
-          else
-            errors.add(field, 'has an invalid time format, It must be in HHMM')
-          end
+          my_str = "#{day}/#{month}/#{year} #{hour}:#{minutes} #{Time.zone.now.strftime("%z")}"
+          res = my_str.to_datetime rescue nil
+          res
         end
         
         attributes.each do |attribute|
@@ -98,28 +59,20 @@ module CoHack
             time_value
           end
           
-          send :define_method, "#{attribute_base}_time_is_valid_date?" do
-            self.send("is_valid_date?".to_sym, "#{attribute_base}_date".to_sym)
+          send :define_method, "#{attribute_base}_time_is_valid?" do
+            self.errors.add(attribute, "is not valid, malformed, or is missing") if self.send(attribute).nil?
           end
           
-          send :define_method, "#{attribute_base}_time_is_valid_time?" do
-            self.send("is_valid_time?".to_sym, "#{attribute_base}_time".to_sym)
-          end
-                    
           send :define_method, "combine_#{attribute}".to_sym do
-            
             date_value = instance_variable_get("@#{attribute_base}_date")
             time_value = instance_variable_get("@#{attribute_base}_time")
             
-            return if !(date_value or time_value)
-            
-            self.send("#{attribute}=".to_sym, combine_to_datetime(date_value, time_value))
+            self.send("#{attribute}=", combine_to_datetime(date_value, time_value))
           end
-
+          
           self.class_eval do
-            validate "#{attribute_base}_time_is_valid_date?"
-            validate "#{attribute_base}_time_is_valid_time?"
-            before_save "combine_#{attribute}"
+            before_validation "combine_#{attribute}"
+            validate "#{attribute_base}_time_is_valid?"
           end
         end
       end
