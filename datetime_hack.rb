@@ -27,9 +27,9 @@ module CoHack
           end
           
           ds = date_string.to_date
-          # default to EST
-          Time.zone ||= 'Eastern Time (US & Canada)'
-          Time.local ds.year, ds.month, ds.day, hour.to_i, minutes.to_i, 0, 0, (Time.zone.utc_offset / 3600)
+          my_str = "#{ds.day}/#{ds.month}/#{ds.year} #{hour}:#{minutes} #{Time.zone.now.strftime("%z")}"
+          res = my_str.to_datetime rescue nil
+          res
         end
         
         send :define_method, "is_valid_date?".to_sym do |field|
