@@ -96,7 +96,7 @@ module CoHack
               instance_variable_set("@#{attribute_base}_time", (self.send(attribute.to_sym).strftime("%H%M") rescue nil ))
               time_value = instance_variable_get("@#{attribute_base}_time")
             end
-            time_value
+            time_value.to_s.gsub(":", "")
           end
           
           send :define_method, "#{attribute_base}_time_is_valid_date?" do
