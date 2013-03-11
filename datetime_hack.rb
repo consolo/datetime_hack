@@ -75,6 +75,8 @@ module CoHack
           
           send :define_method, "#{attribute_base}_date=".to_sym do |date_value|
             instance_variable_set("@#{attribute_base}_date", date_value)
+            self.send("combine_#{attribute}".to_sym)
+            date_value
           end
           
           send :define_method, "#{attribute_base}_date".to_sym do
@@ -88,6 +90,8 @@ module CoHack
           
           send :define_method, "#{attribute_base}_time=".to_sym do |time_value|
             instance_variable_set("@#{attribute_base}_time", time_value ) 
+            self.send("combine_#{attribute}".to_sym)
+            time_value
           end
           
           send :define_method, "#{attribute_base}_time".to_sym do
@@ -120,7 +124,6 @@ module CoHack
           self.class_eval do
             validate "#{attribute_base}_time_is_valid_date?"
             validate "#{attribute_base}_time_is_valid_time?"
-            before_save "combine_#{attribute}"
           end
         end
       end
