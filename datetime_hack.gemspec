@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'datetime_hack'
-  s.version = '1.0.0'
+  s.version = '1.0.1'
   s.author = 'Taylor Redden'
   s.email = 'developers@consoloservices.com'
   s.summary = 'DateTime Hack'
