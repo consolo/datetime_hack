@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'datetime_hack'
-  s.version = '1.0.1'
+  s.version = '1.0.2'
   s.author = 'Taylor Redden'
   s.email = 'developers@consoloservices.com'
   s.summary = 'DateTime Hack'
@@ -10,4 +10,3 @@ Gem::Specification.new do |s|
   s.files = [ 'datetime_hack.rb' ]
   s.add_dependency 'activerecord'
 end
-
