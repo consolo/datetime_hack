@@ -29,7 +29,7 @@ module CoHack
           ds = date_string.to_date
           return nil if ds.nil?
           tz = Time.zone.at((ds.to_time + hour.to_i.hours).to_i)
-          my_str = "#{ds.day}/#{ds.month}/#{ds.year} #{hour}:#{minutes} #{tz.strftime("%z")}"
+          my_str = "#{ds.year}-#{ds.month}-#{ds.day} #{hour}:#{minutes} #{tz.strftime("%z")}"
           res = my_str.to_datetime rescue nil
           res
         end
